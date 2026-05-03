@@ -22,7 +22,7 @@ export default function AppNav() {
         <Link href="/" className="flex items-center gap-2 group">
           <AppLogo size={36} />
           <span className="font-extrabold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors duration-200">
-            Math<span className="text-primary">Arena</span>
+            Jelly<span className="text-primary">Jam</span>
           </span>
         </Link>
 
