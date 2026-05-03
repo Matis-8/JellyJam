@@ -404,37 +404,6 @@ export default function ArenaClient() {
           side="right"
         />
       </div>
-
-      {/* Revealing overlay */}
-      {phase === 'revealing' && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none" style={{ background: 'rgba(250,250,248,0.7)', backdropFilter: 'blur(8px)' }}>
-          <div
-            className="rounded-3xl px-10 py-8 text-center"
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)',
-            }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="h-px w-8" style={{ background: 'rgba(13,148,136,0.3)' }} />
-              <p className="text-xs font-700 tracking-widest uppercase" style={{ color: '#9CA3AF', letterSpacing: '0.12em' }}>
-                Correct Answer
-              </p>
-              <div className="h-px w-8" style={{ background: 'rgba(13,148,136,0.3)' }} />
-            </div>
-            <p
-              className="font-800 font-tabular leading-none mb-2"
-              style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', color: '#0D1F1A' }}
-            >
-              {String(currentQuestion.answer)}
-            </p>
-            <p className="text-sm font-400" style={{ color: '#9CA3AF' }}>
-              {currentQuestion.text}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

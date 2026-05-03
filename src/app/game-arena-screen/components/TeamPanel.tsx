@@ -37,9 +37,9 @@ export default function TeamPanel({
       if (selectedAnswer === option) return 'selected';
       return 'dimmed';
     }
-    // Revealing phase — show correct/wrong
-    if (option === question.answer) return 'correct';
+    // Revealing phase — only show wrong, keep correct hidden
     if (selectedAnswer === option && option !== question.answer) return 'wrong';
+    if (selectedAnswer === option) return 'selected';
     return 'dimmed';
   };
 
@@ -102,32 +102,10 @@ export default function TeamPanel({
         {hasAnswered ? (
           <div
             className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-700"
-            style={
-              isRevealing
-                ? selectedAnswer === question.answer
-                  ? { background: 'rgba(22,163,74,0.1)', color: '#15803D', border: '1px solid rgba(22,163,74,0.2)' }
-                  : { background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }
-                : { background: 'rgba(13,148,136,0.08)', color: '#0D9488', border: '1px solid rgba(13,148,136,0.15)' }
-            }
+            style={{ background: 'rgba(13,148,136,0.08)', color: '#0D9488', border: '1px solid rgba(13,148,136,0.15)' }}
           >
-            {isRevealing ? (
-              selectedAnswer === question.answer ? (
-                <>
-                  <Icon name="CheckCircleIcon" size={15} variant="solid" />
-                  Correct
-                </>
-              ) : (
-                <>
-                  <Icon name="XCircleIcon" size={15} variant="solid" />
-                  Wrong
-                </>
-              )
-            ) : (
-              <>
-                <Icon name="CheckIcon" size={14} />
-                Answered
-              </>
-            )}
+            <Icon name="CheckIcon" size={14} />
+            Answered
           </div>
         ) : (
           <p className="text-sm font-500" style={{ color: '#9CA3AF' }}>
@@ -154,11 +132,6 @@ export default function TeamPanel({
               }`}
               style={style}
             >
-              {(isRevealing || hasAnswered) && isCorrect && (
-                <span className="absolute top-1.5 right-1.5">
-                  <Icon name="CheckCircleIcon" size={14} variant="solid" className="text-green-600" />
-                </span>
-              )}
               {(isRevealing || hasAnswered) && isSelected && !isCorrect && (
                 <span className="absolute top-1.5 right-1.5">
                   <Icon name="XCircleIcon" size={14} variant="solid" className="text-red-500" />
