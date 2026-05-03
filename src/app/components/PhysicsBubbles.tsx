@@ -54,7 +54,7 @@ export default function PhysicsBubbles() {
     // Init bubbles
     bubblesRef.current = BUBBLE_CONFIGS.map((cfg) => {
       const { w, h } = sizeRef.current;
-      const speed = 0.6 + Math.random() * 0.8;
+      const speed = 3.5 + Math.random() * 3.0;
       const angle = Math.random() * Math.PI * 2;
       return {
         x: cfg.radius + Math.random() * (w - cfg.radius * 2),
@@ -138,8 +138,8 @@ export default function PhysicsBubbles() {
     };
 
     let t = 0;
-    const GRAVITY = 0.012;
-    const DAMPING = 0.985;
+    const GRAVITY = 0.08;
+    const DAMPING = 0.999;
 
     const animate = () => {
       const { w, h } = sizeRef.current;
@@ -159,10 +159,10 @@ export default function PhysicsBubbles() {
 
         // Minimum speed to keep them moving
         const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-        if (speed < 0.3) {
+        if (speed < 2.5) {
           const angle = Math.random() * Math.PI * 2;
-          b.vx += Math.cos(angle) * 0.25;
-          b.vy += Math.sin(angle) * 0.25;
+          b.vx += Math.cos(angle) * 1.5;
+          b.vy += Math.sin(angle) * 1.5;
         }
 
         b.x += b.vx;
@@ -171,22 +171,22 @@ export default function PhysicsBubbles() {
         // Wall collisions
         if (b.x - b.radius < 0) {
           b.x = b.radius;
-          b.vx = Math.abs(b.vx) * 0.82;
+          b.vx = Math.abs(b.vx) * 0.97;
           b.wobblePhase = t * b.wobbleSpeed;
         }
         if (b.x + b.radius > w) {
           b.x = w - b.radius;
-          b.vx = -Math.abs(b.vx) * 0.82;
+          b.vx = -Math.abs(b.vx) * 0.97;
           b.wobblePhase = t * b.wobbleSpeed;
         }
         if (b.y - b.radius < 0) {
           b.y = b.radius;
-          b.vy = Math.abs(b.vy) * 0.82;
+          b.vy = Math.abs(b.vy) * 0.97;
           b.wobblePhase = t * b.wobbleSpeed;
         }
         if (b.y + b.radius > h) {
           b.y = h - b.radius;
-          b.vy = -Math.abs(b.vy) * 0.82;
+          b.vy = -Math.abs(b.vy) * 0.97;
           b.wobblePhase = t * b.wobbleSpeed;
         }
 
