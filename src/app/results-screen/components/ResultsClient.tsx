@@ -228,6 +228,17 @@ export default function ResultsClient() {
       {!isDraw && <ConfettiCanvas />}
 
       <div className="max-w-screen-xl mx-auto px-4 lg:px-8 py-10">
+        {/* Back to Home button */}
+        <div className="mb-6">
+          <button
+            onClick={() => { clearGameState(); router.push('/'); }}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground font-600 text-sm transition-colors duration-200 bg-white hover:bg-secondary border border-border px-4 py-2 rounded-xl card-shadow"
+          >
+            <Icon name="ArrowLeftIcon" size={16} />
+            Back to Home
+          </button>
+        </div>
+
         {/* Winner hero */}
         <div className="text-center mb-10">
           {isDraw ? (
