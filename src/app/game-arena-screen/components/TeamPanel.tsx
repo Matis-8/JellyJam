@@ -166,7 +166,7 @@ export default function TeamPanel({
               onClick={() => onAnswer(option)}
               disabled={hasAnswered || phase !== 'playing'}
               className={`relative rounded-2xl border-2 font-700 font-tabular transition-all duration-200 active:scale-95 disabled:cursor-not-allowed hover:scale-[1.02] ${
-                isStringAnswer ? 'py-3 px-4 text-sm text-left' : 'py-4 px-2 text-xl text-center'
+                isStringAnswer ? 'py-3 px-4 text-sm text-center' : 'py-4 px-2 text-xl text-center'
               }`}
               style={style}
             >
