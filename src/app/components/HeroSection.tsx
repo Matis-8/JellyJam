@@ -5,21 +5,10 @@ import { CartoonOwl, CartoonRobot, ToyRocket, ToyStar, ToyBlock, MathSymbolPlus,
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const handleMouse = (e: MouseEvent) => {
-      if (!heroRef.current) return;
-      const rect = heroRef.current.getBoundingClientRect();
-      setMousePos({
-        x: ((e.clientX - rect.left) / rect.width - 0.5) * 20,
-        y: ((e.clientY - rect.top) / rect.height - 0.5) * 20,
-      });
-    };
-    window.addEventListener('mousemove', handleMouse);
-    return () => window.removeEventListener('mousemove', handleMouse);
   }, []);
 
   return (
@@ -39,7 +28,6 @@ export default function HeroSection() {
           opacity: 0.4,
         }}
       />
-
       {/* Large ambient color blobs */}
       <div
         className="absolute pointer-events-none"
@@ -50,8 +38,6 @@ export default function HeroSection() {
           background: 'radial-gradient(circle, rgba(13,148,136,0.08) 0%, transparent 70%)',
           top: '-200px',
           right: '-100px',
-          transform: mounted ? `translate(${mousePos.x * 0.3}px, ${mousePos.y * 0.3}px)` : 'none',
-          transition: 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         }}
       />
       <div
@@ -63,14 +49,10 @@ export default function HeroSection() {
           background: 'radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%)',
           bottom: '0px',
           left: '-100px',
-          transform: mounted ? `translate(${mousePos.x * -0.2}px, ${mousePos.y * -0.2}px)` : 'none',
-          transition: 'transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         }}
       />
-
       {/* Thin horizontal rule accent */}
       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(13,148,136,0.3), transparent)' }} />
-
       <div className="max-w-screen-2xl mx-auto px-8 lg:px-16 xl:px-20 relative z-10">
         {/* Top bar */}
         <div className="flex items-center justify-between py-8">
@@ -177,10 +159,10 @@ export default function HeroSection() {
                 { value: '8', label: 'Game Modes' },
                 { value: '3', label: 'Difficulty Levels' },
                 { value: '2', label: 'Teams' },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-3xl font-800 leading-none" style={{ color: '#0D1F1A' }}>{stat.value}</div>
-                  <div className="text-xs font-500 mt-1" style={{ color: '#9CA3AF' }}>{stat.label}</div>
+              ]?.map((stat) => (
+                <div key={stat?.label}>
+                  <div className="text-3xl font-800 leading-none" style={{ color: '#0D1F1A' }}>{stat?.value}</div>
+                  <div className="text-xs font-500 mt-1" style={{ color: '#9CA3AF' }}>{stat?.label}</div>
                 </div>
               ))}
             </div>
@@ -188,39 +170,21 @@ export default function HeroSection() {
 
           {/* Right — floating game preview card */}
           {mounted && (
-            <div
-              className="relative hidden xl:block"
-              style={{
-                transform: `perspective(1000px) rotateY(${mousePos.x * -0.3}deg) rotateX(${mousePos.y * 0.2}deg)`,
-                transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              }}
-            >
-              {/* Floating toy decorations around card */}
-              <div
-                className="absolute -top-10 -left-10 w-16 h-16 toy-float"
-                style={{ animationDelay: '0s' }}
-              >
+            <div className="relative hidden xl:block">
+              {/* Stationary toy decorations around card */}
+              <div className="absolute -top-10 -left-10 w-16 h-16">
                 <ToyBlock className="w-full h-full drop-shadow-lg" />
               </div>
-              <div
-                className="absolute -top-6 -right-8 w-12 h-12 toy-spin"
-              >
+              <div className="absolute -top-6 -right-8 w-12 h-12">
                 <ToyStar className="w-full h-full drop-shadow-md" color="#F59E0B" />
               </div>
-              <div
-                className="absolute -bottom-8 -left-6 w-10 h-16 toy-float-delay"
-              >
+              <div className="absolute -bottom-8 -left-6 w-10 h-16">
                 <ToyRocket className="w-full h-full drop-shadow-lg" />
               </div>
-              <div
-                className="absolute top-1/2 -right-10 w-10 h-10 toy-float-slow"
-              >
+              <div className="absolute top-1/2 -right-10 w-10 h-10">
                 <MathSymbolPlus className="w-full h-full" />
               </div>
-              <div
-                className="absolute bottom-10 -right-8 w-10 h-10 toy-float"
-                style={{ animationDelay: '0.8s' }}
-              >
+              <div className="absolute bottom-10 -right-8 w-10 h-10">
                 <MathSymbolTimes className="w-full h-full" />
               </div>
 
@@ -268,7 +232,7 @@ export default function HeroSection() {
                       <p className="text-3xl font-800 text-center py-1" style={{ color: '#0D1F1A' }}>8 × 7 = ?</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {['48', '56', '63', '54'].map((opt, i) => (
+                      {['48', '56', '63', '54']?.map((opt, i) => (
                         <div
                           key={`pa-${i}`}
                           className="rounded-xl p-2.5 text-center text-sm font-700 border-2 transition-all"
@@ -300,7 +264,7 @@ export default function HeroSection() {
                       <p className="text-3xl font-800 text-center py-1" style={{ color: '#0D1F1A' }}>8 × 7 = ?</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {['48', '56', '63', '54'].map((opt, i) => (
+                      {['48', '56', '63', '54']?.map((opt, i) => (
                         <div
                           key={`pb-${i}`}
                           className="rounded-xl p-2.5 text-center text-sm font-700 border-2 transition-all"
@@ -334,15 +298,14 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              {/* Character badges floating below card */}
+              {/* Character badges below card */}
               <div className="flex items-end justify-between mt-4 px-4">
                 <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-2xl character-bounce"
+                  className="flex items-center gap-2 px-3 py-2 rounded-2xl"
                   style={{
                     background: '#FFFFFF',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     border: '1px solid #F3F4F6',
-                    animationDelay: '0.2s',
                   }}
                 >
                   <CartoonOwl className="w-8 h-8" />
@@ -355,12 +318,11 @@ export default function HeroSection() {
                   VS
                 </div>
                 <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-2xl character-bounce"
+                  className="flex items-center gap-2 px-3 py-2 rounded-2xl"
                   style={{
                     background: '#FFFFFF',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     border: '1px solid #F3F4F6',
-                    animationDelay: '0.6s',
                   }}
                 >
                   <span className="text-xs font-700" style={{ color: '#DC2626' }}>Team B</span>
@@ -371,7 +333,6 @@ export default function HeroSection() {
           )}
         </div>
       </div>
-
       {/* Bottom edge accent */}
       <div
         className="absolute bottom-0 left-0 right-0 h-px"
