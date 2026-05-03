@@ -16,7 +16,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'MathArena — Classroom Math Battle for Kids',
+  title: 'Jelly Jam — Classroom Math Battle for Kids',
   description:
     'Split-screen math competition game for classrooms. Two teams answer the same questions simultaneously — no login required.',
   icons: {

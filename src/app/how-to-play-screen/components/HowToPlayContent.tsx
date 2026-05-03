@@ -12,7 +12,7 @@ const steps = [
     tag: 'Before the Battle',
     accent: '#0D1F1A',
     details: [
-      { label: 'Open MathArena', body: 'Launch on a classroom projector or shared screen.' },
+      { label: 'Open Jelly Jam', body: 'Launch on a classroom projector or shared screen.' },
       { label: 'Start a Game', body: 'Click "Start a Game" from the home page.' },
       { label: 'Pick a Topic', body: 'Choose Addition, Subtraction, Multiplication, or Division.' },
       { label: 'Set Difficulty', body: 'Easy (1 to 10), Medium (2 to 25), or Hard (5 to 50).' },
@@ -104,7 +104,7 @@ export default function HowToPlayContent() {
               </h1>
             </div>
             <p className="text-base text-[#6B7280] font-500 max-w-sm leading-relaxed md:text-right">
-              Four steps. No login required. Open MathArena, set it up, and your class is competing in under two minutes.
+              Four steps. No login required. Open Jelly Jam, set it up, and your class is competing in under two minutes.
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function HowToPlayContent() {
         {/* CTA */}
         <div className="text-center bg-white rounded-2xl card-shadow-lg border border-border p-10">
           <h2 className="text-2xl font-700 text-foreground mb-2">Ready to Start?</h2>
-          <p className="text-muted-foreground font-500 mb-6">No login, no setup time. Just open MathArena and begin.</p>
+          <p className="text-muted-foreground font-500 mb-6">No login, no setup time. Just open Jelly Jam and begin.</p>
           <Link
             href="/game-setup-screen"
             className="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 active:scale-95 text-white font-700 px-8 py-4 rounded-2xl text-base transition-all duration-200 card-shadow"

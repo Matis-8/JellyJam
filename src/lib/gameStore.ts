@@ -47,7 +47,7 @@ export interface GameState {
   status: 'idle' | 'countdown' | 'playing' | 'round_end' | 'finished';
 }
 
-const STORAGE_KEY = 'matharena_game';
+const STORAGE_KEY = 'jellyjam_game';
 
 export function saveGameState(state: GameState): void {
   if (typeof window !== 'undefined') {
