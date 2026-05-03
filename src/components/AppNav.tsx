@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import AppLogo from '@/components/ui/AppLogo';
+import { CartoonOwl } from '@/components/ui/ToyDecorations';
 import Icon from '@/components/ui/AppIcon';
 
 const navLinks = [
@@ -20,7 +20,7 @@ export default function AppNav() {
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <AppLogo size={36} />
+          <CartoonOwl className="w-9 h-9 flex-shrink-0" />
           <span className="font-extrabold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors duration-200">
             Jelly<span className="text-primary">Jam</span>
           </span>
