@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import { MathSymbolPlus, MathSymbolMinus, MathSymbolTimes, MathSymbolDiv, ShieldBadge, ToyBook, ToyBrain, ToyMagnifier, ToyLightbulb, TrophySVG,  } from '@/components/ui/ToyDecorations';
-import { generateQuestions, saveGameState, DEFAULT_CONFIG } from '@/lib/gameStore';
+import { generateQuestions, saveGameState, shuffleArray, DEFAULT_CONFIG } from '@/lib/gameStore';
 import type { Topic, Difficulty, GameConfig } from '@/lib/gameStore';
 
 interface FormValues {
@@ -113,12 +113,21 @@ export default function GameSetupForm() {
       teamBName: data.teamBName.trim() || 'Team Beta',
     };
 
-    const questions = generateQuestions(config.topic, config.difficulty, config.questionCount, Date.now() % 9999);
+    const seed = Date.now() % 9999;
+    const questions = generateQuestions(config.topic, config.difficulty, config.questionCount, seed);
+
+    // Shuffle questions independently for each team
+    const teamAQuestions = shuffleArray(questions, seed + 1);
+    const teamBQuestions = shuffleArray(questions, seed + 2);
 
     saveGameState({
       config,
       questions,
+      teamAQuestions,
+      teamBQuestions,
       currentRound: 0,
+      teamARound: 0,
+      teamBRound: 0,
       teamAScore: 0,
       teamBScore: 0,
       teamAStreak: 0,
