@@ -38,7 +38,11 @@ export interface RoundResult {
 export interface GameState {
   config: GameConfig;
   questions: Question[];
+  teamAQuestions: Question[];
+  teamBQuestions: Question[];
   currentRound: number;
+  teamARound: number;
+  teamBRound: number;
   teamAScore: number;
   teamBScore: number;
   teamAStreak: number;
@@ -47,7 +51,7 @@ export interface GameState {
   status: 'idle' | 'countdown' | 'playing' | 'round_end' | 'finished';
 }
 
-const STORAGE_KEY = 'matharena_game';
+const STORAGE_KEY = 'jellyjam_game';
 
 export function saveGameState(state: GameState): void {
   if (typeof window !== 'undefined') {
@@ -327,6 +331,20 @@ export function generateQuestions(
   }
 
   return [];
+}
+
+export function shuffleArray<T>(arr: T[], seed: number): T[] {
+  const result = [...arr];
+  let s = seed;
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+  for (let i = result.length - 1; i > 0; i--) {
+    let j = Math.floor(rand() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
 
 export const DEFAULT_CONFIG: GameConfig = {

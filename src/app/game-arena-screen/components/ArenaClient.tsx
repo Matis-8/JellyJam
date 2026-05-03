@@ -12,10 +12,17 @@ export default function ArenaClient() {
   const router = useRouter();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [phase, setPhase] = useState<'playing' | 'revealing' | 'finished'>('playing');
+
+  // Per-team answer state
   const [teamAAnswer, setTeamAAnswer] = useState<number | string | null>(null);
   const [teamBAnswer, setTeamBAnswer] = useState<number | string | null>(null);
   const [teamAAnswerTime, setTeamAAnswerTime] = useState<number>(0);
   const [teamBAnswerTime, setTeamBAnswerTime] = useState<number>(0);
+
+  // Per-team round indices (they progress independently)
+  const [teamARoundIndex, setTeamARoundIndex] = useState(0);
+  const [teamBRoundIndex, setTeamBRoundIndex] = useState(0);
+
   const [timerActive, setTimerActive] = useState(true);
   const [timeLeft, setTimeLeft] = useState(20);
   const [mounted, setMounted] = useState(false);
@@ -29,19 +36,50 @@ export default function ArenaClient() {
       router.push('/game-setup-screen');
       return;
     }
+    // Ensure per-team question arrays exist (fallback for old saves)
+    if (!state.teamAQuestions || state.teamAQuestions.length === 0) {
+      state.teamAQuestions = [...state.questions];
+    }
+    if (!state.teamBQuestions || state.teamBQuestions.length === 0) {
+      state.teamBQuestions = [...state.questions];
+    }
     setGameState(state);
+    setTeamARoundIndex(state.teamARound ?? 0);
+    setTeamBRoundIndex(state.teamBRound ?? 0);
     setTimeLeft(state.config.timePerQuestion);
     roundStartTime.current = Date.now();
   }, [router]);
 
-  const currentQuestion: Question | null =
-    gameState ? gameState.questions[gameState.currentRound] ?? null : null;
+  // Each team's current question comes from their own shuffled list
+  const teamAQuestion: Question | null = gameState
+    ? (gameState.teamAQuestions?.[teamARoundIndex] ?? null)
+    : null;
+  const teamBQuestion: Question | null = gameState
+    ? (gameState.teamBQuestions?.[teamBRoundIndex] ?? null)
+    : null;
+
+  const totalRounds = gameState?.questions.length ?? 0;
+
+  // Overall round = how many rounds have been fully completed (both teams answered)
+  // We track this via gameState.currentRound
+  const currentRoundDisplay = gameState ? gameState.currentRound + 1 : 1;
+  const progressPct = gameState ? (gameState.currentRound / totalRounds) * 100 : 0;
 
   const advanceRound = useCallback(
-    (gs: GameState, aAns: number | string | null, bAns: number | string | null, aTime: number, bTime: number) => {
-      const q = gs.questions[gs.currentRound];
-      const aCorrect = aAns === q.answer;
-      const bCorrect = bAns === q.answer;
+    (
+      gs: GameState,
+      aAns: number | string | null,
+      bAns: number | string | null,
+      aTime: number,
+      bTime: number,
+      aRoundIdx: number,
+      bRoundIdx: number
+    ) => {
+      const qA = gs.teamAQuestions?.[aRoundIdx] ?? gs.questions[aRoundIdx];
+      const qB = gs.teamBQuestions?.[bRoundIdx] ?? gs.questions[bRoundIdx];
+
+      const aCorrect = aAns === qA.answer;
+      const bCorrect = bAns === qB.answer;
 
       const newAScore = gs.teamAScore + (aCorrect ? 10 : 0);
       const newBScore = gs.teamBScore + (bCorrect ? 10 : 0);
@@ -49,9 +87,9 @@ export default function ArenaClient() {
       const newBStreak = bCorrect ? gs.teamBStreak + 1 : 0;
 
       const newRound: import('@/lib/gameStore').RoundResult = {
-        questionId: q.id,
-        question: q.text,
-        correctAnswer: q.answer,
+        questionId: qA.id,
+        question: qA.text,
+        correctAnswer: qA.answer,
         teamAAnswer: aAns,
         teamACorrect: aCorrect,
         teamATime: aTime,
@@ -61,6 +99,8 @@ export default function ArenaClient() {
       };
 
       const nextRoundIndex = gs.currentRound + 1;
+      const nextARound = aRoundIdx + 1;
+      const nextBRound = bRoundIdx + 1;
       const isLastRound = nextRoundIndex >= gs.questions.length;
 
       const updatedState: GameState = {
@@ -71,6 +111,8 @@ export default function ArenaClient() {
         teamBStreak: newBStreak,
         rounds: [...gs.rounds, newRound],
         currentRound: nextRoundIndex,
+        teamARound: nextARound,
+        teamBRound: nextBRound,
         status: isLastRound ? 'finished' : 'playing',
       };
 
@@ -83,6 +125,8 @@ export default function ArenaClient() {
           router.push('/results-screen');
         } else {
           setGameState(updatedState);
+          setTeamARoundIndex(nextARound);
+          setTeamBRoundIndex(nextBRound);
           setTeamAAnswer(null);
           setTeamBAnswer(null);
           setTeamAAnswerTime(0);
@@ -105,10 +149,10 @@ export default function ArenaClient() {
       setTeamAAnswerTime(elapsed);
       if (teamBAnswer !== null) {
         setTimerActive(false);
-        advanceRound(gameState, answer, teamBAnswer, elapsed, teamBAnswerTime);
+        advanceRound(gameState, answer, teamBAnswer, elapsed, teamBAnswerTime, teamARoundIndex, teamBRoundIndex);
       }
     },
-    [gameState, teamAAnswer, teamBAnswer, phase, teamBAnswerTime, advanceRound]
+    [gameState, teamAAnswer, teamBAnswer, phase, teamBAnswerTime, teamARoundIndex, teamBRoundIndex, advanceRound]
   );
 
   const handleTeamBAnswer = useCallback(
@@ -119,10 +163,10 @@ export default function ArenaClient() {
       setTeamBAnswerTime(elapsed);
       if (teamAAnswer !== null) {
         setTimerActive(false);
-        advanceRound(gameState, teamAAnswer, answer, teamAAnswerTime, elapsed);
+        advanceRound(gameState, teamAAnswer, answer, teamAAnswerTime, elapsed, teamARoundIndex, teamBRoundIndex);
       }
     },
-    [gameState, teamAAnswer, teamBAnswer, phase, teamAAnswerTime, advanceRound]
+    [gameState, teamAAnswer, teamBAnswer, phase, teamAAnswerTime, teamARoundIndex, teamBRoundIndex, advanceRound]
   );
 
   const handleTimeUp = useCallback(() => {
@@ -130,8 +174,8 @@ export default function ArenaClient() {
     setTimerActive(false);
     const aTime = teamAAnswer !== null ? teamAAnswerTime : gameState.config.timePerQuestion;
     const bTime = teamBAnswer !== null ? teamBAnswerTime : gameState.config.timePerQuestion;
-    advanceRound(gameState, teamAAnswer, teamBAnswer, aTime, bTime);
-  }, [gameState, teamAAnswer, teamBAnswer, teamAAnswerTime, teamBAnswerTime, phase, advanceRound]);
+    advanceRound(gameState, teamAAnswer, teamBAnswer, aTime, bTime, teamARoundIndex, teamBRoundIndex);
+  }, [gameState, teamAAnswer, teamBAnswer, teamAAnswerTime, teamBAnswerTime, phase, teamARoundIndex, teamBRoundIndex, advanceRound]);
 
   useEffect(() => {
     return () => {
@@ -139,7 +183,7 @@ export default function ArenaClient() {
     };
   }, []);
 
-  if (!gameState || !currentQuestion) {
+  if (!gameState || !teamAQuestion || !teamBQuestion) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#FAFAF8' }}>
         <div className="animate-pulse rounded-2xl w-64 h-32" style={{ background: 'rgba(13,148,136,0.08)' }} />
@@ -148,9 +192,6 @@ export default function ArenaClient() {
   }
 
   const { config } = gameState;
-  const totalRounds = gameState.questions.length;
-  const currentRoundDisplay = gameState.currentRound + 1;
-  const progressPct = ((gameState.currentRound) / totalRounds) * 100;
 
   return (
     <div className="min-h-screen flex flex-col select-none relative overflow-hidden" style={{ background: '#FAFAF8' }}>
@@ -316,63 +357,20 @@ export default function ArenaClient() {
         />
       </div>
 
-      {/* Question card */}
-      <div className="relative z-10 flex items-center justify-center px-6 lg:px-12 py-6 lg:py-8">
-        <div
-          className="w-full max-w-3xl rounded-3xl px-8 lg:px-12 py-6 lg:py-8 text-center"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04)',
-          }}
-        >
-          <div className="flex items-center justify-center gap-3 mb-3">
-            {currentQuestion.category && (
-              <>
-                <span
-                  className="text-xs font-700 tracking-widest uppercase px-3 py-1 rounded-full"
-                  style={{ background: 'rgba(13,148,136,0.08)', color: '#0D9488', letterSpacing: '0.1em' }}
-                >
-                  {currentQuestion.category}
-                </span>
-                <span className="w-1 h-1 rounded-full" style={{ background: '#D1D5DB' }} />
-              </>
-            )}
-            <span className="text-xs font-600 tracking-wide" style={{ color: '#9CA3AF' }}>
-              Question {currentRoundDisplay}
-            </span>
-          </div>
-
-          <p
-            className="font-800 leading-tight"
-            style={{
-              fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-              color: '#0D1F1A',
-            }}
-          >
-            {currentQuestion.text}
-          </p>
-
-          {currentQuestion.hint && (
-            <p className="text-sm font-400 mt-3 italic" style={{ color: '#9CA3AF' }}>
-              Hint: {currentQuestion.hint}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Split arena */}
+      {/* Split arena — each team sees their own question */}
       <div className="relative z-10 flex flex-1">
         <TeamPanel
           teamLabel={config.teamAName}
           teamLetter="A"
           teamColor="var(--team-a)"
           teamBg="rgba(37,99,235,0.04)"
-          question={currentQuestion}
+          question={teamAQuestion}
           selectedAnswer={teamAAnswer}
           phase={phase}
           onAnswer={handleTeamAAnswer}
           side="left"
+          questionNumber={teamARoundIndex + 1}
+          totalQuestions={totalRounds}
         />
 
         {/* VS divider */}
@@ -397,44 +395,15 @@ export default function ArenaClient() {
           teamLetter="B"
           teamColor="var(--team-b)"
           teamBg="rgba(220,38,38,0.04)"
-          question={currentQuestion}
+          question={teamBQuestion}
           selectedAnswer={teamBAnswer}
           phase={phase}
           onAnswer={handleTeamBAnswer}
           side="right"
+          questionNumber={teamBRoundIndex + 1}
+          totalQuestions={totalRounds}
         />
       </div>
-
-      {/* Revealing overlay */}
-      {phase === 'revealing' && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none" style={{ background: 'rgba(250,250,248,0.7)', backdropFilter: 'blur(8px)' }}>
-          <div
-            className="rounded-3xl px-10 py-8 text-center"
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)',
-            }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="h-px w-8" style={{ background: 'rgba(13,148,136,0.3)' }} />
-              <p className="text-xs font-700 tracking-widest uppercase" style={{ color: '#9CA3AF', letterSpacing: '0.12em' }}>
-                Correct Answer
-              </p>
-              <div className="h-px w-8" style={{ background: 'rgba(13,148,136,0.3)' }} />
-            </div>
-            <p
-              className="font-800 font-tabular leading-none mb-2"
-              style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', color: '#0D1F1A' }}
-            >
-              {String(currentQuestion.answer)}
-            </p>
-            <p className="text-sm font-400" style={{ color: '#9CA3AF' }}>
-              {currentQuestion.text}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

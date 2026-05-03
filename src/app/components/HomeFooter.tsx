@@ -15,7 +15,7 @@ export default function HomeFooter() {
         <div className="flex items-center gap-2.5">
           <AppLogo size={26} />
           <span className="font-700 text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>
-            Math<span style={{ color: '#0D9488' }}>Arena</span>
+            Jelly<span style={{ color: '#0D9488' }}>Jam</span>
           </span>
         </div>
 

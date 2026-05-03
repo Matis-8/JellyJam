@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { loadGameState, clearGameState } from '@/lib/gameStore';
 import type { GameState } from '@/lib/gameStore';
@@ -9,9 +9,157 @@ import ResultsChart from './ResultsChart';
 import ConfettiCanvas from './ConfettiCanvas';
 import RoundBreakdown from './RoundBreakdown';
 
+function exportCSV(gameState: GameState) {
+  const { config, teamAScore, teamBScore, rounds } = gameState;
+  const totalRounds = rounds.length;
+  const teamACorrect = rounds.filter((r) => r.teamACorrect).length;
+  const teamBCorrect = rounds.filter((r) => r.teamBCorrect).length;
+  const teamAAccuracy = totalRounds > 0 ? Math.round((teamACorrect / totalRounds) * 100) : 0;
+  const teamBAccuracy = totalRounds > 0 ? Math.round((teamBCorrect / totalRounds) * 100) : 0;
+  const isDraw = teamAScore === teamBScore;
+  const winner = isDraw ? 'Draw' : teamAScore > teamBScore ? config.teamAName : config.teamBName;
+
+  const lines: string[] = [];
+
+  lines.push('JELLY JAM - GAME RESULTS REPORT');
+  lines.push('');
+  lines.push('GAME SUMMARY');
+  lines.push(`Topic,${config.topic}`);
+  lines.push(`Difficulty,${config.difficulty}`);
+  lines.push(`Total Rounds,${totalRounds}`);
+  lines.push(`Winner,${winner}`);
+  lines.push('');
+  lines.push('TEAM SCORES');
+  lines.push(`Team,Score,Correct,Accuracy`);
+  lines.push(`${config.teamAName},${teamAScore},${teamACorrect}/${totalRounds},${teamAAccuracy}%`);
+  lines.push(`${config.teamBName},${teamBScore},${teamBCorrect}/${totalRounds},${teamBAccuracy}%`);
+  lines.push('');
+  lines.push('ROUND BY ROUND BREAKDOWN');
+  lines.push(`Round,Question,Correct Answer,${config.teamAName} Answer,${config.teamAName} Result,${config.teamBName} Answer,${config.teamBName} Result`);
+
+  rounds.forEach((round, i) => {
+    const teamAAnswer = round.teamAAnswer !== null && round.teamAAnswer !== undefined ? String(round.teamAAnswer) : 'No answer';
+    const teamBAnswer = round.teamBAnswer !== null && round.teamBAnswer !== undefined ? String(round.teamBAnswer) : 'No answer';
+    lines.push(
+      `Q${i + 1},"${round.question} = ?",${round.correctAnswer},"${teamAAnswer}",${round.teamACorrect ? 'Correct' : 'Wrong'},"${teamBAnswer}",${round.teamBCorrect ? 'Correct' : 'Wrong'}`
+    );
+  });
+
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `jellyjam-results-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPDF(gameState: GameState) {
+  const { config, teamAScore, teamBScore, rounds } = gameState;
+  const totalRounds = rounds.length;
+  const teamACorrect = rounds.filter((r) => r.teamACorrect).length;
+  const teamBCorrect = rounds.filter((r) => r.teamBCorrect).length;
+  const teamAAccuracy = totalRounds > 0 ? Math.round((teamACorrect / totalRounds) * 100) : 0;
+  const teamBAccuracy = totalRounds > 0 ? Math.round((teamBCorrect / totalRounds) * 100) : 0;
+  const isDraw = teamAScore === teamBScore;
+  const winner = isDraw ? 'Draw' : teamAScore > teamBScore ? config.teamAName : config.teamBName;
+
+  const roundRows = rounds
+    .map((round, i) => {
+      const teamAAnswer = round.teamAAnswer !== null && round.teamAAnswer !== undefined ? String(round.teamAAnswer) : 'No answer';
+      const teamBAnswer = round.teamBAnswer !== null && round.teamBAnswer !== undefined ? String(round.teamBAnswer) : 'No answer';
+      const aColor = round.teamACorrect ? '#16a34a' : '#dc2626';
+      const bColor = round.teamBCorrect ? '#16a34a' : '#dc2626';
+      return `
+        <tr style="border-bottom:1px solid #e5e7eb;">
+          <td style="padding:6px 10px;font-weight:700;color:#6b7280;">Q${i + 1}</td>
+          <td style="padding:6px 10px;">${round.question} = ?</td>
+          <td style="padding:6px 10px;text-align:center;font-weight:700;">${round.correctAnswer}</td>
+          <td style="padding:6px 10px;text-align:center;color:${aColor};font-weight:700;">${teamAAnswer} (${round.teamACorrect ? 'Correct' : 'Wrong'})</td>
+          <td style="padding:6px 10px;text-align:center;color:${bColor};font-weight:700;">${teamBAnswer} (${round.teamBCorrect ? 'Correct' : 'Wrong'})</td>
+        </tr>`;
+    })
+    .join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Jelly Jam Results</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111827; margin: 40px; }
+    h1 { color: #0d9488; font-size: 28px; margin-bottom: 4px; }
+    h2 { font-size: 16px; color: #374151; margin: 24px 0 8px; border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f3f4f6; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; }
+    td { padding: 6px 10px; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
+    .card { background: #f9fafb; border-radius: 8px; padding: 16px; border: 1px solid #e5e7eb; }
+    .card-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .card-value { font-size: 32px; font-weight: 800; }
+    .team-a { color: #0d9488; }
+    .team-b { color: #7c3aed; }
+    .winner-badge { display:inline-block; background:#0d9488; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; }
+    .meta { font-size: 12px; color: #6b7280; margin-bottom: 24px; }
+    @media print { body { margin: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>Jelly Jam</h1>
+  <p class="meta">Game Results Report | Topic: ${config.topic} | Difficulty: ${config.difficulty} | Rounds: ${totalRounds}</p>
+
+  <h2>Winner</h2>
+  <p style="font-size:20px;font-weight:800;">${winner}${!isDraw ? '<span class="winner-badge">Winner</span>' : ''}</p>
+
+  <h2>Team Scores</h2>
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-label">${config.teamAName}</div>
+      <div class="card-value team-a">${teamAScore}</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:6px;">Correct: ${teamACorrect}/${totalRounds} | Accuracy: ${teamAAccuracy}%</div>
+    </div>
+    <div class="card">
+      <div class="card-label">${config.teamBName}</div>
+      <div class="card-value team-b">${teamBScore}</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:6px;">Correct: ${teamBCorrect}/${totalRounds} | Accuracy: ${teamBAccuracy}%</div>
+    </div>
+  </div>
+
+  <h2>Round by Round Breakdown</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Round</th>
+        <th>Question</th>
+        <th>Answer</th>
+        <th>${config.teamAName}</th>
+        <th>${config.teamBName}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${roundRows}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => {
+      win.print();
+      URL.revokeObjectURL(url);
+    };
+  }
+}
+
 export default function ResultsClient() {
   const router = useRouter();
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const downloadMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const state = loadGameState();
@@ -21,6 +169,16 @@ export default function ResultsClient() {
     }
     setGameState(state);
   }, [router]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (downloadMenuRef.current && !downloadMenuRef.current.contains(e.target as Node)) {
+        setShowDownloadMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!gameState) {
     return (
@@ -43,7 +201,6 @@ export default function ResultsClient() {
   const winnerLetter = teamAScore > teamBScore ? 'A' : 'B';
 
   const handlePlayAgain = () => {
-    // Keep config, regenerate questions
     const newState: GameState = {
       ...gameState,
       currentRound: 0,
@@ -54,7 +211,6 @@ export default function ResultsClient() {
       rounds: [],
       status: 'countdown',
     };
-    // Backend integration point: create new session with same config
     const { generateQuestions } = require('@/lib/gameStore');
     newState.questions = generateQuestions(config.topic, config.difficulty, config.questionCount, Date.now() % 9999);
     const { saveGameState } = require('@/lib/gameStore');
@@ -95,7 +251,7 @@ export default function ResultsClient() {
               </div>
               <p className="text-2xl font-700 text-foreground">Wins the Battle!</p>
               <p className="text-muted-foreground font-500">
-                {totalRounds} questions answered — {isDraw ? 'tied' : `${winnerLetter === 'A' ? teamACorrect : teamBCorrect} correct`}
+                {totalRounds} questions answered {isDraw ? 'tied' : `${winnerLetter === 'A' ? teamACorrect : teamBCorrect} correct`}
               </p>
             </div>
           )}
@@ -194,6 +350,38 @@ export default function ResultsClient() {
             <Icon name="AdjustmentsHorizontalIcon" size={18} />
             New Game Setup
           </button>
+
+          {/* Download button with dropdown */}
+          <div className="relative" ref={downloadMenuRef}>
+            <button
+              onClick={() => setShowDownloadMenu((v) => !v)}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-secondary active:scale-95 text-foreground font-700 px-8 py-4 rounded-2xl text-base transition-all duration-200 card-shadow border border-border"
+            >
+              <Icon name="ArrowDownTrayIcon" size={18} />
+              Download Report
+              <Icon name="ChevronDownIcon" size={14} className={`transition-transform duration-200 ${showDownloadMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showDownloadMenu && (
+              <div className="absolute bottom-full mb-2 right-0 sm:left-0 bg-white rounded-2xl card-shadow border border-border overflow-hidden z-50 min-w-[180px]">
+                <button
+                  onClick={() => { exportCSV(gameState); setShowDownloadMenu(false); }}
+                  className="flex items-center gap-3 w-full px-5 py-3.5 text-sm font-600 text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Icon name="TableCellsIcon" size={16} className="text-primary" />
+                  Export as CSV
+                </button>
+                <div className="h-px bg-border mx-3" />
+                <button
+                  onClick={() => { exportPDF(gameState); setShowDownloadMenu(false); }}
+                  className="flex items-center gap-3 w-full px-5 py-3.5 text-sm font-600 text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Icon name="DocumentTextIcon" size={16} className="text-danger" />
+                  Export as PDF
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

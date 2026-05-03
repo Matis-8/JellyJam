@@ -102,7 +102,7 @@ export default function HeroSection() {
             <div className="flex items-center gap-3">
               <div className="h-px w-12" style={{ background: '#0D9488' }} />
               <span className="text-sm font-700 tracking-widest uppercase" style={{ color: '#0D9488', letterSpacing: '0.12em' }}>
-                MathArena
+                Jelly Jam
               </span>
             </div>
 
@@ -245,7 +245,7 @@ export default function HeroSection() {
                     className="flex-1 mx-4 rounded-full h-5 flex items-center px-3"
                     style={{ background: 'rgba(255,255,255,0.08)' }}
                   >
-                    <span className="text-xs font-500" style={{ color: 'rgba(255,255,255,0.4)' }}>MathArena — Battle Mode</span>
+                    <span className="text-xs font-500" style={{ color: 'rgba(255,255,255,0.4)' }}>Jelly Jam — Battle Mode</span>
                   </div>
                 </div>
 

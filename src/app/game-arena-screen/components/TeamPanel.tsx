@@ -13,6 +13,8 @@ interface TeamPanelProps {
   phase: 'playing' | 'revealing' | 'finished';
   onAnswer: (answer: number | string) => void;
   side: 'left' | 'right';
+  questionNumber?: number;
+  totalQuestions?: number;
 }
 
 export default function TeamPanel({
@@ -25,6 +27,8 @@ export default function TeamPanel({
   phase,
   onAnswer,
   side,
+  questionNumber,
+  totalQuestions,
 }: TeamPanelProps) {
   const hasAnswered = selectedAnswer !== null;
   const isRevealing = phase === 'revealing';
@@ -33,13 +37,12 @@ export default function TeamPanel({
   const getButtonState = (option: number | string): 'idle' | 'selected' | 'correct' | 'wrong' | 'dimmed' => {
     if (!hasAnswered && !isRevealing) return 'idle';
     if (!isRevealing) {
-      // Answered but not yet revealing — show selected vs dimmed only
       if (selectedAnswer === option) return 'selected';
       return 'dimmed';
     }
-    // Revealing phase — show correct/wrong
-    if (option === question.answer) return 'correct';
+    // Revealing phase — only show wrong, keep correct hidden
     if (selectedAnswer === option && option !== question.answer) return 'wrong';
+    if (selectedAnswer === option) return 'selected';
     return 'dimmed';
   };
 
@@ -95,6 +98,41 @@ export default function TeamPanel({
         >
           {teamLabel}
         </span>
+        {questionNumber !== undefined && totalQuestions !== undefined && (
+          <span className="text-xs font-600 px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.05)', color: '#6B7280' }}>
+            Q {questionNumber} / {totalQuestions}
+          </span>
+        )}
+      </div>
+
+      {/* Question text for this team */}
+      <div
+        className="w-full max-w-sm rounded-2xl px-5 py-4 text-center"
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+        }}
+      >
+        {question.category && (
+          <span
+            className="inline-block text-xs font-700 tracking-widest uppercase px-2.5 py-0.5 rounded-full mb-2"
+            style={{ background: 'rgba(13,148,136,0.08)', color: '#0D9488', letterSpacing: '0.1em' }}
+          >
+            {question.category}
+          </span>
+        )}
+        <p
+          className="font-800 leading-tight"
+          style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', color: '#0D1F1A' }}
+        >
+          {question.text}
+        </p>
+        {question.hint && (
+          <p className="text-xs font-400 mt-2 italic" style={{ color: '#9CA3AF' }}>
+            Hint: {question.hint}
+          </p>
+        )}
       </div>
 
       {/* Answer status pill */}
@@ -102,32 +140,10 @@ export default function TeamPanel({
         {hasAnswered ? (
           <div
             className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-700"
-            style={
-              isRevealing
-                ? selectedAnswer === question.answer
-                  ? { background: 'rgba(22,163,74,0.1)', color: '#15803D', border: '1px solid rgba(22,163,74,0.2)' }
-                  : { background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }
-                : { background: 'rgba(13,148,136,0.08)', color: '#0D9488', border: '1px solid rgba(13,148,136,0.15)' }
-            }
+            style={{ background: 'rgba(13,148,136,0.08)', color: '#0D9488', border: '1px solid rgba(13,148,136,0.15)' }}
           >
-            {isRevealing ? (
-              selectedAnswer === question.answer ? (
-                <>
-                  <Icon name="CheckCircleIcon" size={15} variant="solid" />
-                  Correct
-                </>
-              ) : (
-                <>
-                  <Icon name="XCircleIcon" size={15} variant="solid" />
-                  Wrong
-                </>
-              )
-            ) : (
-              <>
-                <Icon name="CheckIcon" size={14} />
-                Answered
-              </>
-            )}
+            <Icon name="CheckIcon" size={14} />
+            Answered
           </div>
         ) : (
           <p className="text-sm font-500" style={{ color: '#9CA3AF' }}>
@@ -154,11 +170,6 @@ export default function TeamPanel({
               }`}
               style={style}
             >
-              {(isRevealing || hasAnswered) && isCorrect && (
-                <span className="absolute top-1.5 right-1.5">
-                  <Icon name="CheckCircleIcon" size={14} variant="solid" className="text-green-600" />
-                </span>
-              )}
               {(isRevealing || hasAnswered) && isSelected && !isCorrect && (
                 <span className="absolute top-1.5 right-1.5">
                   <Icon name="XCircleIcon" size={14} variant="solid" className="text-red-500" />
