@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { CartoonOwl, CartoonRobot, ToyRocket, ToyStar, ToyBlock, MathSymbolPlus, MathSymbolTimes } from '@/components/ui/ToyDecorations';
+import PhysicsBubbles from './PhysicsBubbles';
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -19,6 +20,9 @@ export default function HeroSection() {
         minHeight: '100vh',
         background: '#FAFAF8'
       }}>
+
+      {/* Physics bubbles background */}
+      <PhysicsBubbles />
 
       {/* Noise texture overlay */}
       <div
