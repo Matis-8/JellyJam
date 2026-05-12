@@ -582,7 +582,7 @@ const gkHard = [
   { q: 'What is the chemical symbol for tungsten?', options: ['Tu', 'Tn', 'W', 'Tg'], answer: 'W' },
   { q: 'Who developed the theory of general relativity?', options: ['Newton', 'Bohr', 'Einstein', 'Heisenberg'], answer: 'Einstein' },
   { q: 'What is the largest organ inside the human body?', options: ['Heart', 'Liver', 'Kidney', 'Lung'], answer: 'Liver' },
-  { q: 'Which battle ended Napoleon\'s rule?', options: ['Austerlitz', 'Trafalgar', 'Waterloo', 'Borodino'], answer: 'Waterloo' },
+  { q: 'Which ended Napoleon\'s rule?', options: ['Austerlitz', 'Trafalgar', 'Waterloo', 'Borodino'], answer: 'Waterloo' },
   { q: 'What is the chemical formula for glucose?', options: ['C6H12O6', 'C12H22O11', 'CH4', 'C2H5OH'], answer: 'C6H12O6' },
   { q: 'Who invented the World Wide Web?', options: ['Bill Gates', 'Steve Jobs', 'Tim Berners-Lee', 'Vint Cerf'], answer: 'Tim Berners-Lee' },
   { q: 'What is the atomic mass of oxygen?', options: ['8', '14', '16', '18'], answer: '16' },
