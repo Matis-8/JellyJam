@@ -8,7 +8,7 @@ const steps = [
     id: 'step-setup',
     number: '01',
     title: 'Pick Your Game',
-    description: 'Choose from 8 game modes — Math, Spelling, Word Scramble, General Knowledge, Brain Patterns and more.',
+    description: 'Choose from 8 game modes  Math, Spelling, Word Scramble, General Knowledge, Brain Patterns and more.',
     accent: '#0D9488',
     Character: CartoonOwl,
     icon: (
