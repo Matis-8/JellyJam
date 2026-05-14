@@ -213,7 +213,7 @@ export default function HeroSection() {
                   className="flex-1 mx-4 rounded-full h-5 flex items-center px-3"
                   style={{ background: 'rgba(255,255,255,0.08)' }}>
 
-                    <span className="text-xs font-500" style={{ color: 'rgba(255,255,255,0.4)' }}>Jelly Jam — Battle Mode</span>
+                    <span className="text-xs font-500" style={{ color: 'rgba(255,255,255,0.4)' }}>Jelly Jam  Mode</span>
                   </div>
                 </div>
 

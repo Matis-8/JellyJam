@@ -46,7 +46,7 @@ function GameSetupContent() {
                 <span style={{ color: '#0D9488' }}>Arena</span>
               </h1>
               <p className="mt-3 text-base font-400 max-w-md" style={{ color: '#6B7280', lineHeight: 1.6 }}>
-                Pick a game mode, set the difficulty, name your teams — then let the battle begin.
+                Pick a game mode, set the difficulty, name your teams,  then let the begin.
               </p>
             </div>
 

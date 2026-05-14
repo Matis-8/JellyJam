@@ -1,6 +1,4 @@
-/**
- * Image Hosts Configuration (add your image hosts here)
- */
+
 
 export const imageHosts = [
     {
@@ -17,6 +15,6 @@ export const imageHosts = [
     },
     {
         protocol: 'https',
-        hostname: 'img.rocket.new',
+        hostname: 'images.pixabay.com',
     },
 ];

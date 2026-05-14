@@ -29,7 +29,7 @@ const modes: GameMode[] = [
     tagline: 'Times tables under pressure',
     accent: '#0D9488',
     accentLight: '#CCFBF1',
-    description: 'Speed and recall battle — who knows their times tables cold?',
+    description: 'Speed and recall  who knows their times tables cold?',
     badge: 'Math',
     badgeColor: '#0F766E',
     badgeBg: '#CCFBF1',
