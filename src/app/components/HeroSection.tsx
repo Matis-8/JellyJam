@@ -70,12 +70,10 @@ export default function HeroSection() {
 
             No login required
           </div>
-          <div className="flex items-center gap-6 text-xs font-600 tracking-wide" style={{ color: '#6B7280' }}>
-            <span>8 Game Modes</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
-            <span>2 Teams</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
-            <span>Instant Play</span>
+          <div className="flex items-center gap-3 text-xs font-600 tracking-wide" style={{ color: '#6B7280' }}>
+            <span className="rounded-full border px-3 py-1" style={{ borderColor: '#E5E7EB' }}>8 modes</span>
+            <span className="rounded-full border px-3 py-1" style={{ borderColor: '#E5E7EB' }}>2 teams</span>
+            <span className="rounded-full border px-3 py-1" style={{ borderColor: '#E5E7EB' }}>Instant setup</span>
           </div>
         </div>
 
@@ -118,9 +116,8 @@ export default function HeroSection() {
             {/* Descriptor */}
             <p
               className="text-xl font-400 leading-relaxed max-w-lg"
-              style={{ color: '#4B5563' }}>Two teams. One screen. Eight game modes  Math, Spelling, Word Scrambles, General Knowledge and Brain Patterns. Built for classrooms and game nights.
-
-
+              style={{ color: '#4B5563' }}>
+              Two teams. One screen. Eight focused modes for classrooms, clubs, and game nights.
             </p>
 
             {/* CTA row */}
@@ -157,19 +154,6 @@ export default function HeroSection() {
               </Link>
             </div>
 
-            {/* Stat strip */}
-            <div className="flex items-center gap-8 pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
-              {[
-              { value: '8', label: 'Game Modes' },
-              { value: '3', label: 'Difficulty Levels' },
-              { value: '2', label: 'Teams' }]?.
-              map((stat) =>
-              <div key={stat?.label}>
-                  <div className="text-3xl font-800 leading-none" style={{ color: '#0D1F1A' }}>{stat?.value}</div>
-                  <div className="text-xs font-500 mt-1" style={{ color: '#9CA3AF' }}>{stat?.label}</div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Right — floating game preview card */}
