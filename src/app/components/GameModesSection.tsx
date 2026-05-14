@@ -136,6 +136,19 @@ export default function GameModesSection() {
                 style={{ background: mode.accent }}
               />
 
+              {mode.id === 'multiplication' && (
+                <div className="absolute top-4 left-4 z-10">
+                  <span
+                    className="text-xs font-700 px-3 py-1.5 rounded-full"
+                    style={{ background: '#FFFBF0', color: mode.accent, border: `1px solid ${mode.accent}33` }}
+                  >
+                    Pair Extraordinaire
+                  </span>
+                </div>
+              )}
+
+              {/* testing */}
+
               <div className="flex items-start justify-between gap-3">
                 <div
                   className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
